@@ -1,0 +1,29 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f4f7f4;
+  color: #1f2a1f;
+}
+
+#root {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+}
+
+h1 {
+  font-size: 28px;
+  margin: 24px 0 12px;
+}
+
+a {
+  color: #2f7a3f;
+}
+
+button {
+  cursor: pointer;
+}
