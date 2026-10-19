@@ -92,6 +92,9 @@ router.post('/', requireAuth, async (req, res, next) => {
     if (typeof name !== 'string' || name.trim().length === 0) {
       return res.status(400).json({ error: 'Habit name is required.' });
     }
+    if (name.trim().length > 100) {
+      return res.status(400).json({ error: 'Habit name must be 100 characters or fewer.' });
+    }
 
     const resolvedSpecies = species === undefined ? DEFAULT_SPECIES : species;
     if (!PLANT_SPECIES.includes(resolvedSpecies)) {

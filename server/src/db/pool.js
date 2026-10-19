@@ -8,4 +8,10 @@ const pool = new Pool({
   ssl: process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false },
 });
 
+// node-postgres crashes whole process on unhandled Pool 'error' event
+// (idle client dropped by Supabase, network blip). Log it, don't let it kill the site.
+pool.on('error', (err) => {
+  console.error('Unexpected pg pool error', err);
+});
+
 export default pool;

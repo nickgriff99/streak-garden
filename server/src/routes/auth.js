@@ -7,6 +7,9 @@ const router = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
+// Caps bcrypt's hashing cost per request. No real password needs to be
+// this long; this is just a ceiling, not a usability limit.
+const MAX_PASSWORD_LENGTH = 128;
 
 function validateCredentials(email, password) {
   if (typeof email !== 'string' || !EMAIL_RE.test(email.trim())) {
@@ -14,6 +17,9 @@ function validateCredentials(email, password) {
   }
   if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
     return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
+  }
+  if (password.length > MAX_PASSWORD_LENGTH) {
+    return `Password must be at most ${MAX_PASSWORD_LENGTH} characters.`;
   }
   return null;
 }

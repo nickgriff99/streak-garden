@@ -141,6 +141,27 @@ describe('GET /api/habits', () => {
   });
 });
 
+describe('POST /api/habits name validation', () => {
+  it('returns 400 and does not insert a row when name is over 100 characters', async () => {
+    const userId = await createUser('longname@example.com');
+    const tooLongName = 'a'.repeat(101);
+
+    const response = await request(app)
+      .post('/api/habits')
+      .set('x-test-user-id', userId)
+      .send({ name: tooLongName });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: 'Habit name must be 100 characters or fewer.' });
+
+    // A rejected create is not a partial create, no row should land.
+    const countResult = await pool.query('select count(*) from habits where user_id = $1', [
+      userId,
+    ]);
+    expect(Number(countResult.rows[0].count)).toBe(0);
+  });
+});
+
 describe('POST /api/habits species validation', () => {
   it('round-trips a valid non-default species', async () => {
     const userId = await createUser('mushroom@example.com');

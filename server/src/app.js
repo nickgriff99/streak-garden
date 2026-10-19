@@ -42,6 +42,17 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
+  // express.json() hands body-parser errors to this handler too (it calls
+  // next(err), same as every route above). Those two cases have a real
+  // client-side cause (bad JSON, body too big) so they get their own real
+  // status code instead of being lumped into the generic 500 below.
+  if (err.type === 'entity.parse.failed' && err.status === 400) {
+    return res.status(400).json({ error: 'Request body is not valid JSON.' });
+  }
+  if (err.type === 'entity.too.large' && err.status === 413) {
+    return res.status(413).json({ error: 'Request body is too large.' });
+  }
+
   // Full error (stack, DB detail, everything) goes to the server log only.
   // The client never sees more than a generic message, so a raw Postgres
   // error (which can contain SQL or connection detail) never reaches a

@@ -53,6 +53,15 @@ describe('POST /api/auth/signup', () => {
     expect(second.body).toEqual({ error: expect.any(String) });
   });
 
+  it('returns 400 for a password over the max length', async () => {
+    const response = await request(app)
+      .post('/api/auth/signup')
+      .send({ email: 'too-long-password@example.com', password: 'a'.repeat(129) });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: expect.any(String) });
+  });
+
   // Real edge case, not a padding test: the existence check and the insert
   // are two separate round trips with no transaction or advisory lock
   // between them, so two signups for the same email arriving at the same

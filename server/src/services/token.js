@@ -23,7 +23,11 @@ function signToken(payload) {
 // it, so expiry is enforced by the library itself, not by this app
 // re-checking an "exp" field by hand.
 function verifyToken(token) {
-  return jwt.verify(token, getSecret());
+  // signToken above never passes an algorithm option, so jsonwebtoken signs
+  // with its default, HS256. Pin verify to the same so a future change to
+  // this file (or a crafted token with an "alg" header) can't silently
+  // widen what gets accepted here.
+  return jwt.verify(token, getSecret(), { algorithms: ['HS256'] });
 }
 
 export { signToken, verifyToken };

@@ -32,6 +32,7 @@ export function AddHabitForm({ onAdd }) {
         placeholder="New habit, e.g. Drink water"
         value={name}
         onChange={(event) => setName(event.target.value)}
+        maxLength={100}
       />
       <fieldset className="species-picker">
         <legend>Pick a plant</legend>
