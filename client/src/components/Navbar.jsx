@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { PixelPlant } from './PixelPlant';
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -13,6 +14,7 @@ export function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">
+        <PixelPlant species="sunflower" stage="flourishing" size={24} />
         Streak Garden
       </Link>
       <div className="navbar-links">

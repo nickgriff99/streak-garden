@@ -2,6 +2,7 @@ import { Router } from 'express';
 import pool from '../db/pool.js';
 import { requireAuth } from '../middleware/auth.js';
 import { computeGrowth } from '../utils/growth.js';
+import { PLANT_SPECIES, DEFAULT_SPECIES } from '../utils/species.js';
 
 const router = Router();
 
@@ -54,7 +55,7 @@ async function requireOwnedHabit(req, res) {
 router.get('/', requireAuth, async (req, res, next) => {
   try {
     const habitsResult = await pool.query(
-      'select id, name from habits where user_id = $1 order by created_at asc',
+      'select id, name, species from habits where user_id = $1 order by created_at asc',
       [req.user.id]
     );
     const habitIds = habitsResult.rows.map((row) => row.id);
@@ -75,6 +76,7 @@ router.get('/', requireAuth, async (req, res, next) => {
     const habits = habitsResult.rows.map((row) => ({
       id: row.id,
       name: row.name,
+      species: row.species,
       growth: computeGrowth(checkinDatesByHabit.get(row.id) ?? []),
     }));
 
@@ -86,19 +88,26 @@ router.get('/', requireAuth, async (req, res, next) => {
 
 router.post('/', requireAuth, async (req, res, next) => {
   try {
-    const { name } = req.body ?? {};
+    const { name, species } = req.body ?? {};
     if (typeof name !== 'string' || name.trim().length === 0) {
       return res.status(400).json({ error: 'Habit name is required.' });
     }
 
+    const resolvedSpecies = species === undefined ? DEFAULT_SPECIES : species;
+    if (!PLANT_SPECIES.includes(resolvedSpecies)) {
+      return res.status(400).json({
+        error: `Species must be one of: ${PLANT_SPECIES.join(', ')}.`,
+      });
+    }
+
     const result = await pool.query(
-      'insert into habits (user_id, name) values ($1, $2) returning id, name',
-      [req.user.id, name.trim()]
+      'insert into habits (user_id, name, species) values ($1, $2, $3) returning id, name, species',
+      [req.user.id, name.trim(), resolvedSpecies]
     );
     const row = result.rows[0];
 
     res.status(201).json({
-      habit: { id: row.id, name: row.name, growth: computeGrowth([]) },
+      habit: { id: row.id, name: row.name, species: row.species, growth: computeGrowth([]) },
     });
   } catch (err) {
     next(err);

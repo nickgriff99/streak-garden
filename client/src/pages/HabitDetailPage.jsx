@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckinCalendar } from '../components/CheckinCalendar';
+import { PixelPlant } from '../components/PixelPlant';
 import { useCheckins } from '../hooks/useCheckins';
+import { useHabits } from '../hooks/useHabits';
 
 // Checkins are stored and compared as UTC calendar dates (see habits.js and
 // growth.js), so "today" on the client has to be computed the same way,
@@ -15,11 +17,14 @@ function todayUTCDateString() {
 export function HabitDetailPage() {
   const { id } = useParams();
   const { checkins, isLoading, error, addCheckin } = useCheckins(id);
+  const { habits } = useHabits();
   const [checkinError, setCheckinError] = useState(null);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
 
   if (isLoading) return <p>Loading habit...</p>;
   if (error) return <p className="form-error">{error}</p>;
+
+  const habit = habits.find((candidate) => candidate.id === id);
 
   const alreadyCheckedInToday = checkins.some(
     (checkin) => checkin.date === todayUTCDateString()
@@ -40,6 +45,11 @@ export function HabitDetailPage() {
   return (
     <div className="page habit-detail-page">
       <h1>Habit history</h1>
+      {habit && (
+        <div className="garden-bed garden-bed-hero">
+          <PixelPlant species={habit.species} stage={habit.growth.stage} size={96} />
+        </div>
+      )}
       <button type="button" onClick={handleCheckin} disabled={alreadyCheckedInToday || isCheckingIn}>
         {alreadyCheckedInToday ? 'Checked in today' : 'Check in today'}
       </button>

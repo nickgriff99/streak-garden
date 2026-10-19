@@ -1,12 +1,27 @@
 :root {
   color-scheme: light;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  /* garden/retro palette, shared by index.css and App.css */
+  --color-soil-dark: #3e2b20;
+  --color-soil-light: #6b4a32;
+  --color-leaf: #2f7a3f;
+  --color-leaf-dark: #1e5c2b;
+  --color-panel: #fdf6e3;
+  --color-ink: #1f2a1f;
+  --color-accent: #e8a33d;
+
+  /* --font-pixel is for headings/brand/buttons only, --font-body is for
+     everything else so the pixel font never shows up at paragraph size */
+  --font-pixel: 'Press Start 2P', system-ui, sans-serif;
+  --font-body: system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--font-body);
 }
 
 body {
   margin: 0;
   background: #f4f7f4;
-  color: #1f2a1f;
+  color: var(--color-ink);
 }
 
 #root {
@@ -15,15 +30,52 @@ body {
   padding: 0 20px 40px;
 }
 
+h1,
+h2,
+h3,
+.navbar-brand,
+button {
+  font-family: var(--font-pixel);
+}
+
 h1 {
-  font-size: 28px;
-  margin: 24px 0 12px;
+  font-size: 22px;
+  line-height: 1.5;
+  margin: 24px 0 16px;
+}
+
+h2 {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h3 {
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 a {
-  color: #2f7a3f;
+  color: var(--color-leaf);
 }
 
 button {
   cursor: pointer;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 10px 16px;
+  border: 3px solid var(--color-ink);
+  border-radius: 0;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  box-shadow: 4px 4px 0 var(--color-ink);
+}
+
+button:active {
+  box-shadow: none;
+  transform: translate(4px, 4px);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

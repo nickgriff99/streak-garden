@@ -121,3 +121,68 @@ describe('ownership checks on another user\'s habit', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('GET /api/habits', () => {
+  it('returns the species that was inserted for each habit', async () => {
+    const userId = await createUser('lister@example.com');
+    await request(app)
+      .post('/api/habits')
+      .set('x-test-user-id', userId)
+      .send({ name: 'Water the cactus', species: 'cactus' });
+
+    const response = await request(app).get('/api/habits').set('x-test-user-id', userId);
+
+    expect(response.status).toBe(200);
+    expect(response.body.habits).toHaveLength(1);
+    expect(response.body.habits[0]).toMatchObject({
+      name: 'Water the cactus',
+      species: 'cactus',
+    });
+  });
+});
+
+describe('POST /api/habits species validation', () => {
+  it('round-trips a valid non-default species', async () => {
+    const userId = await createUser('mushroom@example.com');
+
+    const response = await request(app)
+      .post('/api/habits')
+      .set('x-test-user-id', userId)
+      .send({ name: 'Forage', species: 'mushroom' });
+
+    expect(response.status).toBe(201);
+    expect(response.body.habit.species).toBe('mushroom');
+  });
+
+  it('defaults to sunflower when species is omitted', async () => {
+    const userId = await createUser('defaulter@example.com');
+
+    const response = await request(app)
+      .post('/api/habits')
+      .set('x-test-user-id', userId)
+      .send({ name: 'Read' });
+
+    expect(response.status).toBe(201);
+    expect(response.body.habit.species).toBe('sunflower');
+  });
+
+  it('returns 400 and does not insert a row for an invalid species', async () => {
+    const userId = await createUser('badspecies@example.com');
+
+    const response = await request(app)
+      .post('/api/habits')
+      .set('x-test-user-id', userId)
+      .send({ name: 'Nope', species: 'dragon' });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: 'Species must be one of: sunflower, cactus, mushroom, clover, bonsai.',
+    });
+
+    // A rejected create is not a partial create, no row should land.
+    const countResult = await pool.query('select count(*) from habits where user_id = $1', [
+      userId,
+    ]);
+    expect(Number(countResult.rows[0].count)).toBe(0);
+  });
+});

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { HabitPlant } from './HabitPlant';
 
 function renderPlant(growth) {
-  const habit = { id: 'habit-1', name: 'Drink water', growth };
+  const habit = { id: 'habit-1', name: 'Drink water', species: 'sunflower', growth };
   render(
     <MemoryRouter>
       <HabitPlant habit={habit} />
@@ -16,7 +16,7 @@ describe('HabitPlant', () => {
   it('shows the sapling stage and streak count for a healthy growing habit', () => {
     renderPlant({ streak: 5, stage: 'sapling', isWilted: false });
 
-    expect(screen.getByText('🪴')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /sunflower plant, sapling stage/i })).toBeInTheDocument();
     expect(screen.getByText('5 day streak')).toBeInTheDocument();
     expect(screen.queryByText(/wilted/)).not.toBeInTheDocument();
   });
@@ -24,7 +24,7 @@ describe('HabitPlant', () => {
   it('shows the seed stage for a brand new habit with no streak yet', () => {
     renderPlant({ streak: 0, stage: 'seed', isWilted: false });
 
-    expect(screen.getByText('🌱')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /sunflower plant, seed stage/i })).toBeInTheDocument();
     expect(screen.getByText('0 day streak')).toBeInTheDocument();
   });
 

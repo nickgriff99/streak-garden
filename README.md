@@ -34,6 +34,11 @@ and plain SQL on purpose, so the code is easy to read and debug end to end.
    exists`. To undo it, uncomment and run the `drop table` block at the
    bottom of `schema.sql` instead.
 
+   `schema.sql` also adds the `habits.species` column with `alter table
+   ... add column if not exists`, so re-running it against a database that
+   already has the `habits` table picks up the new column safely, with no
+   data loss and no manual `alter table` needed.
+
    Alternatively, once `server/.env` has `DATABASE_URL` filled in, run
    `npm run migrate` from `server/` instead of calling `psql` directly
    (`server/src/db/migrate.js` just reads `schema.sql` and runs it through
@@ -172,6 +177,25 @@ Expect `{"status":"ok"}`. If this does not come back, stop and fix the
 server deploy before touching the client, the client has nothing to talk
 to otherwise.
 
+### Rolling out a schema change (example: plant species)
+
+The three-pass dance above is only for the very first deploy of each
+service. Once both services are live, a normal feature that adds a column
+(like the `habits.species` column) ships in a straight line, not a
+chicken-and-egg loop:
+
+1. Run `npm run migrate` against the live `DATABASE_URL` first.
+2. Deploy the updated server. This has to come after step 1, since the
+   server's `species`-aware queries would error against a schema that does
+   not have the column yet.
+3. Deploy the updated client any time after step 2. This is safe to lag:
+   the new `habits.species` column has a default, so old server code
+   keeps working unchanged against it, and even a client deploy that
+   lands slightly early is harmless, since extra `species` data sent to
+   the old server is simply ignored, and a missing `species` field coming
+   back from an old server response falls back to the default plant in
+   the client.
+
 ### Rollback
 
 Render keeps previous successful deploys for both services. To roll back
@@ -187,7 +211,7 @@ migration.
 ## Data model
 
 - `users`: id, email, password_hash, created_at
-- `habits`: id, user_id, name, created_at
+- `habits`: id, user_id, name, species (one of sunflower, cactus, mushroom, clover, bonsai, default sunflower), created_at
 - `checkins`: id, habit_id, date, created_at, unique on (habit_id, date)
 
 ## Growth stages
@@ -204,3 +228,11 @@ Computed from the current streak length in `server/src/utils/growth.js`:
 
 If the most recent checkin is more than one day old, the streak resets to
 0 and the habit is marked wilted.
+
+## Plant species
+
+Each habit has a `species` (sunflower, cactus, mushroom, clover, or
+bonsai), picked when the habit is created and defaulting to sunflower if
+omitted. It is purely cosmetic, it only changes which pixel art is
+rendered and has no effect on growth-stage computation. The allowed list
+is validated server side; an unlisted species is rejected with a 400.

@@ -6,10 +6,12 @@ export function GardenGrid({ habits }) {
   }
 
   return (
-    <div className="garden-grid">
-      {habits.map((habit) => (
-        <HabitPlant key={habit.id} habit={habit} />
-      ))}
+    <div className="garden-bed">
+      <div className="garden-grid">
+        {habits.map((habit) => (
+          <HabitPlant key={habit.id} habit={habit} />
+        ))}
+      </div>
     </div>
   );
 }

@@ -30,6 +30,12 @@ create table if not exists habits (
 -- the FK that filters it.
 create index if not exists habits_user_id_idx on habits (user_id);
 
+-- habits table already exists live (on Render/Supabase), so adding a column
+-- has to be alter table, not folded into the create table if not exists
+-- block above, that block is a no-op against a table that already exists
+-- and would never pick up a new column on a live database.
+alter table habits add column if not exists species text not null default 'sunflower';
+
 create table if not exists checkins (
   id uuid primary key default gen_random_uuid(),
   habit_id uuid not null references habits (id) on delete cascade,

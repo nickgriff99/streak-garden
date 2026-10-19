@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { PixelPlant } from './PixelPlant';
+import { DEFAULT_SPECIES, PLANT_SPECIES, SPECIES_LABELS } from '../pixelart/plantSprites';
 
 export function AddHabitForm({ onAdd }) {
   const [name, setName] = useState('');
+  const [species, setSpecies] = useState(DEFAULT_SPECIES);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -12,8 +15,9 @@ export function AddHabitForm({ onAdd }) {
     setIsSubmitting(true);
     setError(null);
     try {
-      await onAdd(name.trim());
+      await onAdd({ name: name.trim(), species });
       setName('');
+      setSpecies(DEFAULT_SPECIES);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -29,6 +33,22 @@ export function AddHabitForm({ onAdd }) {
         value={name}
         onChange={(event) => setName(event.target.value)}
       />
+      <fieldset className="species-picker">
+        <legend>Pick a plant</legend>
+        {PLANT_SPECIES.map((speciesOption) => (
+          <label key={speciesOption} className="species-option">
+            <input
+              type="radio"
+              name="species"
+              value={speciesOption}
+              checked={species === speciesOption}
+              onChange={() => setSpecies(speciesOption)}
+            />
+            <PixelPlant species={speciesOption} stage="seed" size={28} />
+            {SPECIES_LABELS[speciesOption]}
+          </label>
+        ))}
+      </fieldset>
       <button type="submit" disabled={isSubmitting}>
         Plant it
       </button>

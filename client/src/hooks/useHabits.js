@@ -23,8 +23,8 @@ export function useHabits() {
     loadHabits();
   }, [loadHabits]);
 
-  async function addHabit(name) {
-    const data = await apiClient.post('/api/habits', { name });
+  async function addHabit({ name, species }) {
+    const data = await apiClient.post('/api/habits', { name, species });
     setHabits((current) => [...current, data.habit]);
   }
 

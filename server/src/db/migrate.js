@@ -22,7 +22,7 @@ async function migrate() {
   try {
     await pool.query(sql);
     console.log(
-      'streak-garden migrate: done. users, habits, checkins created if missing; existing data untouched.'
+      'streak-garden migrate: done. users, habits, checkins created if missing; habits.species column added if missing; existing data untouched.'
     );
   } catch (err) {
     console.error('streak-garden migrate: failed,', err.message);
