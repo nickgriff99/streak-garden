@@ -10,10 +10,8 @@
   --color-ink: #1f2a1f;
   --color-accent: #e8a33d;
 
-  /* --font-pixel is for headings/brand/buttons only, --font-body is for
-     everything else so the pixel font never shows up at paragraph size */
   --font-pixel: 'Press Start 2P', system-ui, sans-serif;
-  --font-body: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-body: var(--font-pixel);
 
   font-family: var(--font-body);
 }
